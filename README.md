@@ -1,8 +1,12 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+EchoMind is an AI chatbot web app with auth, subscriptions, and an OpenAI-powered assistant.
 
 ## Getting Started
 
-First, run the development server:
+First, configure environment variables and run migrations:
+
+1. Copy `.env.example` to `.env` and fill values
+2. Run `npx prisma migrate dev --name init`
+3. Start the dev server:
 
 ```bash
 npm run dev
@@ -14,7 +18,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
