@@ -5,6 +5,11 @@ EchoMind is an AI chatbot web app with auth, subscriptions, and an OpenAI-powere
 First, configure environment variables and run migrations:
 
 1. Copy `.env.example` to `.env` and fill values
+   - NEXTAUTH_URL, NEXTAUTH_SECRET
+   - DATABASE_URL (defaults to SQLite)
+   - GITHUB_ID, GITHUB_SECRET
+   - OPENAI_API_KEY
+   - STRIPE keys + price IDs
 2. Run `npx prisma migrate dev --name init`
 3. Start the dev server:
 
