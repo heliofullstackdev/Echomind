@@ -28,8 +28,10 @@ export default function LoginPage() {
 					<button disabled={loading} className="w-full rounded-md bg-white/10 p-3 text-white hover:bg-white/20 disabled:opacity-50">{loading ? "Signing in..." : "Sign in"}</button>
 				</form>
 				{error && <p className="text-sm text-red-400">{error}</p>}
-				<div className="pt-2">
+				<div className="pt-2 space-y-2">
 					<button onClick={() => signIn("github", { callbackUrl: "/" })} className="w-full rounded-md bg-white p-3 text-black">Continue with GitHub</button>
+					<button onClick={() => signIn("google", { callbackUrl: "/" })} className="w-full rounded-md bg-white p-3 text-black">Continue with Google</button>
+					<div className="text-center text-sm text-neutral-300">Don't have an account? <a href="/auth/register" className="text-white underline">Register</a></div>
 				</div>
 			</div>
 		</div>
