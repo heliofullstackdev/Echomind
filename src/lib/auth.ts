@@ -2,13 +2,11 @@ import NextAuth, { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { z } from "zod";
 
 export const authConfig: NextAuthConfig = {
-	adapter: PrismaAdapter(prisma),
 	providers: [
 		GitHub({
 			clientId: process.env.GITHUB_ID!,
