@@ -9,7 +9,7 @@ import { z } from "zod";
 import type { JWT } from "next-auth/jwt";
 import type { Session, User } from "next-auth";
 
-export const authConfig: NextAuthOptions = {
+const authConfig: NextAuthOptions = {
 	providers: [
 		...(process.env.GITHUB_ID && process.env.GITHUB_SECRET ? [
 			GitHub({
