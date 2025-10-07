@@ -1,11 +1,13 @@
 "use client";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AuthButton } from "@/components/AuthButton";
 
 export default function Home() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 p-8">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-4">
+        <AuthButton />
         <ThemeToggle />
       </div>
       <h1 className="text-4xl font-bold text-foreground">EchoMind</h1>
