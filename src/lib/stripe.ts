@@ -1,7 +1,10 @@
+import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-	apiVersion: "2025-09-30.clover",
-});
+const stripeSecret = process.env.STRIPE_SECRET_KEY;
+
+export const stripe: Stripe | null = stripeSecret
+	? new Stripe(stripeSecret, { apiVersion: "2025-09-30.clover" })
+	: null;
 
 export const pricing = {
 	MONTHLY: process.env.STRIPE_PRICE_MONTHLY as string,
@@ -14,4 +17,3 @@ export function planForPriceId(priceId?: string | null): "PRO_MONTHLY" | "PRO_YE
 	if (priceId === pricing.YEARLY) return "PRO_YEARLY";
 	return null;
 }
-import Stripe from "stripe";

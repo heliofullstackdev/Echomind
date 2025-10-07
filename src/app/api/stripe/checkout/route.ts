@@ -3,6 +3,10 @@ import { stripe, pricing } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
 	try {
+		if (!stripe) {
+			return new Response(JSON.stringify({ error: "Stripe not configured" }), { status: 500, headers: { "Content-Type": "application/json" } });
+		}
+
 		const body = await req.json();
 		const priceKey: "monthly" | "yearly" = body?.price;
 		const priceId = priceKey === "yearly" ? pricing.YEARLY : pricing.MONTHLY;
