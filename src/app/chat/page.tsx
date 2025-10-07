@@ -63,33 +63,46 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="mx-auto flex h-[100dvh] max-w-2xl flex-col px-4">
+		<div className="mx-auto flex h-[100dvh] w-full max-w-3xl flex-col px-4">
 			<header className="sticky top-0 z-10 -mx-4 border-b border-border bg-background/80 px-4 py-3 backdrop-blur">
-				<div className="flex items-center justify-between">
+				<div className="mx-auto flex w-full max-w-3xl items-center justify-between">
 					<h1 className="text-center text-xl font-semibold text-foreground">EchoMind</h1>
 					<ThemeToggle />
 				</div>
 			</header>
-			<main className="flex flex-1 flex-col gap-4 overflow-y-auto py-4">
-				{messages.map((m, i) => (
-					<div key={i} className={`w-full rounded-2xl px-4 py-3 ${m.role === "assistant" ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground ml-auto"}`}>
-						<p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
-					</div>
-				))}
+			<main className="flex flex-1 flex-col gap-3 overflow-y-auto py-4">
+				{messages.map((m, i) => {
+					const isUser = m.role === "user";
+					return (
+						<div key={i} className={`flex w-full items-end ${isUser ? "justify-end" : "justify-start"}`}>
+							{!isUser && (
+								<div className="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">AI</div>
+							)}
+							<div className={`${isUser ? "rounded-2xl rounded-br-sm bg-primary text-primary-foreground" : "rounded-2xl rounded-bl-sm bg-muted text-foreground"} max-w-[75%] px-4 py-3 shadow-sm`}>
+								<p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+							</div>
+							{isUser && (
+								<div className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-foreground">You</div>
+							)}
+						</div>
+					);
+				})}
 				<div ref={endRef} />
 			</main>
-			<footer className="-mx-4 border-t border-border bg-background p-4">
-				<div className="flex items-center gap-2">
-					<input
-						value={input}
-						onChange={(e) => setInput(e.target.value)}
-						onKeyDown={onKeyDown}
-						placeholder="Type your message..."
-						className="flex-1 rounded-xl bg-input p-3 text-foreground placeholder-muted-foreground outline-none"
-					/>
-					<button onClick={sendMessage} disabled={loading} className="rounded-xl bg-primary px-4 py-3 text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
-						{loading ? "Sending..." : "Send"}
-					</button>
+			<footer className="-mx-4 border-t border-border bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+				<div className="mx-auto flex w-full max-w-3xl items-center gap-2">
+					<div className="relative flex-1">
+						<input
+							value={input}
+							onChange={(e) => setInput(e.target.value)}
+							onKeyDown={onKeyDown}
+							placeholder="Type your message..."
+							className="w-full rounded-xl border border-border bg-input/80 p-3 pr-12 text-foreground placeholder-muted-foreground shadow-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
+						/>
+						<button onClick={sendMessage} disabled={loading} className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+							{loading ? "Sending..." : "Send"}
+						</button>
+					</div>
 				</div>
 			</footer>
 		</div>
