@@ -55,15 +55,15 @@ export const authConfig: NextAuthOptions = {
 		async jwt({ token, user }: { token: JWT; user?: User }) {
 			// Initial sign in
 			if (user) {
-				(token as any).id = (user as any).id;
-				(token as any).role = (user as any).role ?? "user";
+				(token as JWT & { id: string; role: string }).id = (user as User & { id: string }).id;
+				(token as JWT & { id: string; role: string }).role = (user as User & { role?: string }).role ?? "user";
 			}
 			return token;
 		},
 		async session({ session, token }: { session: Session; token: JWT }) {
 			if (session.user && token) {
-				(session.user as any).id = (token as any).id;
-				(session.user as any).role = (token as any).role;
+				(session.user as Session["user"] & { id: string; role: string }).id = (token as JWT & { id: string }).id;
+				(session.user as Session["user"] & { id: string; role: string }).role = (token as JWT & { role: string }).role;
 			}
 			return session;
 		},

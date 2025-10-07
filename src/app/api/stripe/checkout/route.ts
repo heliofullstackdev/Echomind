@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
 			allow_promotion_codes: true,
 		});
 		return new Response(JSON.stringify({ url: session.url }), { headers: { "Content-Type": "application/json" } });
-	} catch (e: any) {
-		return new Response(JSON.stringify({ error: e?.message ?? "Unknown error" }), { status: 500, headers: { "Content-Type": "application/json" } });
+	} catch (e: unknown) {
+		const error = e instanceof Error ? e.message : "Unknown error";
+		return new Response(JSON.stringify({ error }), { status: 500, headers: { "Content-Type": "application/json" } });
 	}
 }

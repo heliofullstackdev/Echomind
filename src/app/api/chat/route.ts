@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
 		const response = await client.chat.completions.create({
 			model: "gpt-4o-mini",
-			messages: messages.map((m) => ({ role: m.role as any, content: m.content })),
+			messages: messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
 			stream: true,
 		});
 
@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
 		});
 
         return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
-	} catch (e: any) {
-		return new Response(JSON.stringify({ error: e?.message ?? "Unknown error" }), { status: 500, headers: { "Content-Type": "application/json" } });
+	} catch (e: unknown) {
+		const error = e instanceof Error ? e.message : "Unknown error";
+		return new Response(JSON.stringify({ error }), { status: 500, headers: { "Content-Type": "application/json" } });
 	}
 }

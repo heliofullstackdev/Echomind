@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -46,8 +47,9 @@ export default function ChatPage() {
 					return clone;
 				});
 			}
-		} catch (err: any) {
-			setMessages((m) => [...m, { role: "assistant", content: `Sorry, something went wrong: ${err.message ?? err}` }]);
+		} catch (err: unknown) {
+			const error = err instanceof Error ? err.message : String(err);
+			setMessages((m) => [...m, { role: "assistant", content: `Sorry, something went wrong: ${error}` }]);
 		} finally {
 			setLoading(false);
 		}
@@ -62,27 +64,30 @@ export default function ChatPage() {
 
 	return (
 		<div className="mx-auto flex h-[100dvh] max-w-2xl flex-col px-4">
-			<header className="sticky top-0 z-10 -mx-4 border-b border-neutral-800 bg-neutral-950/80 px-4 py-3 backdrop-blur">
-				<h1 className="text-center text-xl font-semibold text-white">EchoMind</h1>
+			<header className="sticky top-0 z-10 -mx-4 border-b border-border bg-background/80 px-4 py-3 backdrop-blur">
+				<div className="flex items-center justify-between">
+					<h1 className="text-center text-xl font-semibold text-foreground">EchoMind</h1>
+					<ThemeToggle />
+				</div>
 			</header>
 			<main className="flex flex-1 flex-col gap-4 overflow-y-auto py-4">
 				{messages.map((m, i) => (
-					<div key={i} className={`w-full rounded-2xl px-4 py-3 ${m.role === "assistant" ? "bg-neutral-900 text-neutral-100" : "bg-neutral-800 text-white ml-auto"}`}>
+					<div key={i} className={`w-full rounded-2xl px-4 py-3 ${m.role === "assistant" ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground ml-auto"}`}>
 						<p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
 					</div>
 				))}
 				<div ref={endRef} />
 			</main>
-			<footer className="-mx-4 border-t border-neutral-800 bg-neutral-950 p-4">
+			<footer className="-mx-4 border-t border-border bg-background p-4">
 				<div className="flex items-center gap-2">
 					<input
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
 						onKeyDown={onKeyDown}
 						placeholder="Type your message..."
-						className="flex-1 rounded-xl bg-neutral-900 p-3 text-white placeholder-neutral-500 outline-none"
+						className="flex-1 rounded-xl bg-input p-3 text-foreground placeholder-muted-foreground outline-none"
 					/>
-					<button onClick={sendMessage} disabled={loading} className="rounded-xl bg-white/10 px-4 py-3 text-white hover:bg-white/20 disabled:opacity-50">
+					<button onClick={sendMessage} disabled={loading} className="rounded-xl bg-primary px-4 py-3 text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
 						{loading ? "Sending..." : "Send"}
 					</button>
 				</div>

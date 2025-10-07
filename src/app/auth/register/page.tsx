@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -24,8 +25,9 @@ export default function RegisterPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Registration failed");
             setSuccess(true);
-        } catch (err: any) {
-            setError(err.message ?? String(err));
+        } catch (err: unknown) {
+            const error = err instanceof Error ? err.message : String(err);
+            setError(error);
         } finally {
             setLoading(false);
         }
@@ -33,18 +35,21 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-dvh flex items-center justify-center px-4">
-            <div className="w-full max-w-md space-y-6 rounded-xl border border-neutral-800 bg-neutral-950 p-6">
-                <h1 className="text-2xl font-semibold text-white">Create your account</h1>
+            <div className="w-full max-w-md space-y-6 rounded-xl border border-border bg-card p-6">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold text-card-foreground">Create your account</h1>
+                    <ThemeToggle />
+                </div>
                 <form onSubmit={onSubmit} className="space-y-4">
-                    <input className="w-full rounded-md bg-neutral-900 p-3 text-white placeholder-neutral-500" placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
-                    <input className="w-full rounded-md bg-neutral-900 p-3 text-white placeholder-neutral-500" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <input className="w-full rounded-md bg-neutral-900 p-3 text-white placeholder-neutral-500" type="password" placeholder="Password (min 6 chars)" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <button disabled={loading} className="w-full rounded-md bg-white/10 p-3 text-white hover:bg-white/20 disabled:opacity-50">{loading ? "Creating..." : "Create account"}</button>
+                    <input className="w-full rounded-md bg-input p-3 text-foreground placeholder-muted-foreground" placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
+                    <input className="w-full rounded-md bg-input p-3 text-foreground placeholder-muted-foreground" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <input className="w-full rounded-md bg-input p-3 text-foreground placeholder-muted-foreground" type="password" placeholder="Password (min 6 chars)" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <button disabled={loading} className="w-full rounded-md bg-primary p-3 text-primary-foreground hover:bg-primary/90 disabled:opacity-50">{loading ? "Creating..." : "Create account"}</button>
                 </form>
-                {error && <p className="text-sm text-red-400">{error}</p>}
-                {success && <p className="text-sm text-green-400">Account created. You can now sign in.</p>}
-                <div className="pt-2 text-sm text-neutral-300">
-                    Already have an account? <a href="/auth/login" className="text-white underline">Sign in</a>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                {success && <p className="text-sm text-green-600 dark:text-green-400">Account created. You can now sign in.</p>}
+                <div className="pt-2 text-sm text-muted-foreground">
+                    Already have an account? <a href="/auth/login" className="text-foreground underline">Sign in</a>
                 </div>
             </div>
         </div>

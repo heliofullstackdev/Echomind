@@ -1,5 +1,7 @@
 "use client";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 export default function PricingPage() {
 	async function checkout(price: "monthly" | "yearly") {
 		const res = await fetch("/api/stripe/checkout", {
@@ -12,22 +14,25 @@ export default function PricingPage() {
 	}
 	return (
 		<div className="mx-auto max-w-5xl px-6 py-12">
-			<h1 className="mb-8 text-center text-4xl font-bold text-white">Pricing</h1>
+			<div className="flex items-center justify-between mb-8">
+				<h1 className="text-4xl font-bold text-foreground">Pricing</h1>
+				<ThemeToggle />
+			</div>
 			<div className="grid gap-6 sm:grid-cols-3">
-				<div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 text-white">
+				<div className="rounded-2xl border border-border bg-card p-6 text-card-foreground">
 					<h2 className="mb-2 text-xl font-semibold">Free</h2>
-					<p className="mb-6 text-neutral-400">Basic chat, limited usage</p>
-					<a href="/chat" className="inline-block rounded-lg bg-white/10 px-4 py-2">Start</a>
+					<p className="mb-6 text-muted-foreground">Basic chat, limited usage</p>
+					<a href="/chat" className="inline-block rounded-lg bg-secondary px-4 py-2 text-secondary-foreground hover:bg-secondary/80">Start</a>
 				</div>
-				<div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 text-white">
+				<div className="rounded-2xl border border-border bg-card p-6 text-card-foreground">
 					<h2 className="mb-2 text-xl font-semibold">Pro Monthly</h2>
-					<p className="mb-6 text-neutral-400">$10 / month</p>
-					<button onClick={() => checkout("monthly")} className="rounded-lg bg-white px-4 py-2 text-black">Subscribe</button>
+					<p className="mb-6 text-muted-foreground">$10 / month</p>
+					<button onClick={() => checkout("monthly")} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90">Subscribe</button>
 				</div>
-				<div className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6 text-white">
+				<div className="rounded-2xl border border-border bg-card p-6 text-card-foreground">
 					<h2 className="mb-2 text-xl font-semibold">Pro Yearly</h2>
-					<p className="mb-6 text-neutral-400">$99 / year</p>
-					<button onClick={() => checkout("yearly")} className="rounded-lg bg-white px-4 py-2 text-black">Subscribe</button>
+					<p className="mb-6 text-muted-foreground">$99 / year</p>
+					<button onClick={() => checkout("yearly")} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90">Subscribe</button>
 				</div>
 			</div>
 		</div>
