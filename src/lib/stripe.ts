@@ -1,7 +1,6 @@
-import Stripe from "stripe";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-	apiVersion: "2024-12-18.acacia",
+	apiVersion: "2025-09-30.clover",
 });
 
 export const pricing = {
@@ -15,3 +14,4 @@ export function planForPriceId(priceId?: string | null): "PRO_MONTHLY" | "PRO_YE
 	if (priceId === pricing.YEARLY) return "PRO_YEARLY";
 	return null;
 }
+import Stripe from "stripe";

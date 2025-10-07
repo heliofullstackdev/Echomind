@@ -44,25 +44,25 @@ export async function POST(req: NextRequest) {
 			case "customer.subscription.updated": {
 				const sub = event.data.object as Stripe.Subscription;
 				const priceId = sub.items.data[0]?.price?.id ?? null;
-				await prisma.subscription.upsert({
-					where: { stripeSubscriptionId: sub.id },
-					update: {
-						plan: planForPriceId(priceId) ?? "PRO_MONTHLY",
-						status: statusToEnum(sub.status),
-						stripeCustomerId: typeof sub.customer === "string" ? sub.customer : undefined,
-						stripePriceId: typeof priceId === "string" ? priceId : undefined,
-						currentPeriodEnd: new Date(sub.current_period_end * 1000),
-					},
-					create: {
-						userId: "unknown",
-						plan: planForPriceId(priceId) ?? "PRO_MONTHLY",
-						status: statusToEnum(sub.status),
-						stripeCustomerId: typeof sub.customer === "string" ? sub.customer : undefined,
-						stripeSubscriptionId: sub.id,
-						stripePriceId: typeof priceId === "string" ? priceId : undefined,
-						currentPeriodEnd: new Date(sub.current_period_end * 1000),
-					},
-				});
+				   await prisma.subscription.upsert({
+					   where: { stripeSubscriptionId: sub.id },
+					   update: {
+						   plan: planForPriceId(priceId) ?? "PRO_MONTHLY",
+						   status: statusToEnum(sub.status),
+						   stripeCustomerId: typeof sub.customer === "string" ? sub.customer : undefined,
+						   stripePriceId: typeof priceId === "string" ? priceId : undefined,
+						   currentPeriodEnd: new Date((sub as any).current_period_end * 1000),
+					   },
+					   create: {
+						   userId: "unknown",
+						   plan: planForPriceId(priceId) ?? "PRO_MONTHLY",
+						   status: statusToEnum(sub.status),
+						   stripeCustomerId: typeof sub.customer === "string" ? sub.customer : undefined,
+						   stripeSubscriptionId: sub.id,
+						   stripePriceId: typeof priceId === "string" ? priceId : undefined,
+						   currentPeriodEnd: new Date((sub as any).current_period_end * 1000),
+					   },
+				   });
 				break;
 			}
 			default:
