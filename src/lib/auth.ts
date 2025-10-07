@@ -47,16 +47,23 @@ export const authConfig: NextAuthConfig = {
 		}),
 	],
 	callbacks: {
-		session: async ({ session, user }) => {
+		async jwt({ token, user }) {
+			if (user) {
+				(token as any).id = (user as any).id;
+				(token as any).role = (user as any).role ?? "user";
+			}
+			return token;
+		},
+		async session({ session, token }) {
 			if (session.user) {
-				(session.user as any).id = user.id;
-				(session.user as any).role = (user as any).role;
+				(session.user as any).id = (token as any).id;
+				(session.user as any).role = (token as any).role;
 			}
 			return session;
 		},
 	},
 	pages: { signIn: "/auth/login" },
-	session: { strategy: "database" },
+	session: { strategy: "jwt" },
 	secret: process.env.NEXTAUTH_SECRET,
 };
 
