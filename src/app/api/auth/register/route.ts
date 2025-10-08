@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { hash } from "bcryptjs";
@@ -11,36 +11,86 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
     try {
+        // Parse request body
         const body = await req.json();
+        console.log("Registration request received:", { email: body.email, hasPassword: !!body.password });
+
+        // Validate input
         const parsed = schema.safeParse(body);
         if (!parsed.success) {
-            return new Response(JSON.stringify({ error: "Invalid input" }), { status: 400, headers: { "Content-Type": "application/json" } });
+            console.error("Validation error:", parsed.error);
+            return NextResponse.json(
+                { error: "Invalid input", details: parsed.error.errors },
+                { status: 400 }
+            );
         }
 
         const { email, password, name } = parsed.data;
 
-        const existing = await prisma.user.findUnique({ where: { email } });
+        // Check if user already exists
+        const existing = await prisma.user.findUnique({ 
+            where: { email } 
+        });
+        
         if (existing) {
-            return new Response(JSON.stringify({ error: "Email already in use" }), { status: 409, headers: { "Content-Type": "application/json" } });
+            console.log("User already exists:", email);
+            return NextResponse.json(
+                { error: "Email already in use" },
+                { status: 409 }
+            );
         }
 
-        const user = await prisma.user.create({ data: { email, name } });
+        // Hash password
         const hashed = await hash(password, 10);
+        console.log("Password hashed successfully");
+
+        // Create user
+        const user = await prisma.user.create({ 
+            data: { 
+                email, 
+                name: name || null,
+                emailVerified: null,
+            } 
+        });
+        console.log("User created:", user.id);
+
+        // Create credentials account
         await prisma.account.create({
             data: {
                 userId: user.id,
                 type: "credentials",
                 provider: "credentials",
                 providerAccountId: user.id,
-                refresh_token: hashed,
+                refresh_token: hashed, // Store hashed password in refresh_token field
             },
         });
+        console.log("Account created for user:", user.id);
 
-        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+        return NextResponse.json(
+            { success: true, message: "Account created successfully" },
+            { status: 201 }
+        );
     } catch (e: unknown) {
-        const error = e instanceof Error ? e.message : "Unknown error";
-        return new Response(JSON.stringify({ error }), { status: 500, headers: { "Content-Type": "application/json" } });
+        console.error("Registration error:", e);
+        
+        if (e instanceof Error) {
+            // Check for specific Prisma errors
+            if (e.message.includes("Unique constraint")) {
+                return NextResponse.json(
+                    { error: "Email already in use" },
+                    { status: 409 }
+                );
+            }
+            
+            return NextResponse.json(
+                { error: e.message },
+                { status: 500 }
+            );
+        }
+        
+        return NextResponse.json(
+            { error: "Unknown error occurred" },
+            { status: 500 }
+        );
     }
 }
-
-

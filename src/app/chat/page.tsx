@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export default function ChatPage() {
+	const { data: session, status } = useSession();
+	const router = useRouter();
 	const [messages, setMessages] = useState<ChatMessage[]>([
 		{ role: "assistant", content: "Hi there! What can I help you with today?" },
 	]);
@@ -14,8 +18,26 @@ export default function ChatPage() {
 	const endRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
+		if (status === "unauthenticated") {
+			router.push("/auth/login?callbackUrl=/chat");
+		}
+	}, [status, router]);
+
+	useEffect(() => {
 		endRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages.length]);
+
+	if (status === "loading") {
+		return (
+			<div className="flex h-[100dvh] items-center justify-center">
+				<div className="text-muted-foreground">Loading...</div>
+			</div>
+		);
+	}
+
+	if (!session) {
+		return null;
+	}
 
 	async function sendMessage() {
 		if (!input.trim() || loading) return;
