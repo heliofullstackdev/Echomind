@@ -81,7 +81,7 @@ const bcrypt = require('bcryptjs');
     console.log('🔧 Environment Variables:');
     console.log(`  NEXTAUTH_SECRET: ${process.env.NEXTAUTH_SECRET ? '✅ Set' : '❌ Missing'}`);
     console.log(`  NEXTAUTH_URL: ${process.env.NEXTAUTH_URL || '❌ Missing'}`);
-    console.log(`  DATABASE_URL: ${process.env.TURSO_DATABASE_URL ? '✅ Set' : '❌ Missing'}`);
+    console.log(`  DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Set' : '❌ Missing'}`);
     console.log(`  OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? '✅ Set' : '❌ Missing'}`);
     
     if (!process.env.NEXTAUTH_SECRET) {
