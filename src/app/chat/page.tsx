@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -89,7 +89,23 @@ export default function ChatPage() {
 			<header className="sticky top-0 z-10 -mx-4 border-b border-border bg-background/80 px-4 py-3 backdrop-blur">
 				<div className="mx-auto flex w-full max-w-3xl items-center justify-between">
 					<h1 className="text-center text-xl font-semibold text-foreground">EchoMind</h1>
-					<ThemeToggle />
+					<div className="flex items-center gap-3">
+						<div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+							<div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
+								{session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || "U"}
+							</div>
+							<span className="text-sm text-foreground max-w-[150px] truncate">
+								{session.user?.name || session.user?.email}
+							</span>
+						</div>
+						<button
+							onClick={() => signOut({ callbackUrl: "/" })}
+							className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground hover:bg-muted transition-colors"
+						>
+							Sign out
+						</button>
+						<ThemeToggle />
+					</div>
 				</div>
 			</header>
 			<main className="flex flex-1 flex-col gap-3 overflow-y-auto py-4">

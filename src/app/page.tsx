@@ -1,17 +1,39 @@
 "use client";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 p-8">
       <div className="absolute top-4 right-4 flex items-center gap-3">
-        <a 
-          href="/auth/login" 
-          className="rounded-lg border border-border bg-background px-4 py-2 text-foreground hover:bg-muted transition-colors"
-        >
-          Sign in
-        </a>
+        {status === "loading" ? (
+          <div className="text-sm text-muted-foreground">Loading...</div>
+        ) : session ? (
+          <>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || "U"}
+              </div>
+              <span className="text-sm text-foreground">{session.user?.name || session.user?.email}</span>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="rounded-lg border border-border bg-background px-4 py-2 text-foreground hover:bg-muted transition-colors text-sm"
+            >
+              Sign out
+            </button>
+          </>
+        ) : (
+          <a 
+            href="/auth/login" 
+            className="rounded-lg border border-border bg-background px-4 py-2 text-foreground hover:bg-muted transition-colors"
+          >
+            Sign in
+          </a>
+        )}
         <ThemeToggle />
       </div>
       <h1 className="text-4xl font-bold text-foreground">EchoMind</h1>

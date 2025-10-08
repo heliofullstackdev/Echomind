@@ -3,26 +3,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String?       @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  apiKeys       ApiKey[]
-  subscriptions Subscription[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
 }
 
 model Account {
@@ -52,6 +37,18 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  subscriptions Subscription[]
+  apiKeys       ApiKey[]
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -60,27 +57,28 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  plan                 String   // PRO_MONTHLY, PRO_YEARLY
+  status               String   // ACTIVE, INACTIVE, PAST_DUE, CANCELED
+  stripeCustomerId     String?
+  stripeSubscriptionId String   @unique
+  stripePriceId        String?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model ApiKey {
   id        String   @id @default(cuid())
   name      String
   hashedKey String   @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
 
-model Subscription {
-  id                   String   @id @default(cuid())
-  userId               String
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan                 String   // PRO_MONTHLY, PRO_YEARLY, etc.
-  status               String   // ACTIVE, PAST_DUE, CANCELED, INACTIVE
-  stripeCustomerId     String?
-  stripeSubscriptionId String?  @unique
-  stripePriceId        String?
-  currentPeriodEnd     DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
