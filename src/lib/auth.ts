@@ -1,76 +1,114 @@
-import NextAuth from "next-auth";
-import type { NextAuthOptions } from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { z } from "zod";
-import type { JWT } from "next-auth/jwt";
-import type { Session, User } from "next-auth";
 
-const authConfig: NextAuthOptions = {
+export const authOptions: AuthOptions = {
+	adapter: PrismaAdapter(prisma) as any,
 	providers: [
-		...(process.env.GITHUB_ID && process.env.GITHUB_SECRET ? [
-			GitHub({
-				clientId: process.env.GITHUB_ID,
-				clientSecret: process.env.GITHUB_SECRET,
-			})
-		] : []),
-		...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
-			Google({
-				clientId: process.env.GOOGLE_CLIENT_ID,
-				clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-			})
-		] : []),
+		...(process.env.GITHUB_ID && process.env.GITHUB_SECRET
+			? [
+					GitHub({
+						clientId: process.env.GITHUB_ID,
+						clientSecret: process.env.GITHUB_SECRET,
+					}),
+			  ]
+			: []),
+		...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+			? [
+					Google({
+						clientId: process.env.GOOGLE_CLIENT_ID,
+						clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+					}),
+			  ]
+			: []),
 		Credentials({
+			id: "credentials",
 			name: "Credentials",
 			credentials: {
 				email: { label: "Email", type: "text" },
 				password: { label: "Password", type: "password" },
 			},
 			async authorize(credentials) {
-				const schema = z.object({ email: z.string().email(), password: z.string().min(6) });
-				const parsed = schema.safeParse(credentials);
-				if (!parsed.success) {
-                    throw new Error("Invalid email or password format");
-                }
-				const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
-				if (!user) {
-                    throw new Error("Account not found");
-                }
-				const account = await prisma.account.findFirst({ where: { userId: user.id, provider: "credentials" } });
-				if (!account?.refresh_token) {
-                    throw new Error("Credentials login not set for this account");
-                }
-				const ok = await compare(parsed.data.password, account.refresh_token);
-				if (!ok) {
-                    throw new Error("Invalid email or password");
-                }
-				return { id: user.id, name: user.name ?? undefined, email: user.email ?? undefined, image: user.image ?? undefined };
+				try {
+					const schema = z.object({ 
+						email: z.string().email(), 
+						password: z.string().min(6) 
+					});
+					const parsed = schema.safeParse(credentials);
+					
+					if (!parsed.success) {
+						return null;
+					}
+
+					const user = await prisma.user.findUnique({ 
+						where: { email: parsed.data.email } 
+					});
+					
+					if (!user) {
+						return null;
+					}
+
+					const account = await prisma.account.findFirst({ 
+						where: { 
+							userId: user.id, 
+							provider: "credentials" 
+						} 
+					});
+					
+					if (!account?.refresh_token) {
+						return null;
+					}
+
+					const ok = await compare(parsed.data.password, account.refresh_token);
+					
+					if (!ok) {
+						return null;
+					}
+
+					return { 
+						id: user.id, 
+						name: user.name ?? undefined, 
+						email: user.email ?? undefined, 
+						image: user.image ?? undefined 
+					};
+				} catch (error) {
+					console.error("Auth error:", error);
+					return null;
+				}
 			},
 		}),
 	],
 	callbacks: {
-		async jwt({ token, user }: { token: JWT; user?: User }) {
-			// Initial sign in
+		async jwt({ token, user }) {
 			if (user) {
-				(token as JWT & { id: string; role: string }).id = (user as User & { id: string }).id;
-				(token as JWT & { id: string; role: string }).role = (user as User & { role?: string }).role ?? "user";
+				token.id = user.id;
+				token.role = "user";
 			}
 			return token;
 		},
-		async session({ session, token }: { session: Session; token: JWT }) {
+		async session({ session, token }) {
 			if (session.user && token) {
-				(session.user as Session["user"] & { id: string; role: string }).id = (token as JWT & { id: string }).id;
-				(session.user as Session["user"] & { id: string; role: string }).role = (token as JWT & { role: string }).role;
+				session.user.id = token.id as string;
+				session.user.role = (token.role as string) || "user";
 			}
 			return session;
 		},
 	},
-	pages: { signIn: "/auth/login" },
-	session: { strategy: "jwt" },
+	pages: { 
+		signIn: "/auth/login",
+		error: "/auth/login",
+	},
+	session: { 
+		strategy: "jwt",
+		maxAge: 30 * 24 * 60 * 60,
+	},
 	secret: process.env.NEXTAUTH_SECRET,
+	debug: process.env.NODE_ENV === "development",
 };
 
-export default NextAuth(authConfig);
+export default NextAuth(authOptions);

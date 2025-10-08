@@ -1,11 +1,9 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,21 +12,17 @@ datasource db {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  email              String?   @unique
-  emailVerified      DateTime?
-  image              String?
-  role               String    @default("user")
-  stripeCustomerId   String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-
-  // Relations
-  accounts           Account[]
-  sessions           Session[]
-  subscriptions      Subscription[]
-  apiKeys            ApiKey[]
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  apiKeys       ApiKey[]
+  subscriptions Subscription[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model Account {
@@ -55,8 +49,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -67,44 +60,27 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-enum Plan {
-  FREE
-  PRO_MONTHLY
-  PRO_YEARLY
-}
-
-enum SubscriptionStatus {
-  INACTIVE
-  ACTIVE
-  PAST_DUE
-  CANCELED
+model ApiKey {
+  id        String   @id @default(cuid())
+  name      String
+  hashedKey String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Subscription {
-  id                   String               @id @default(cuid())
+  id                   String   @id @default(cuid())
   userId               String
-  plan                 Plan
-  status               SubscriptionStatus   @default(INACTIVE)
-  stripeSubscriptionId String? @unique
-  stripePriceId        String?
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 String   // PRO_MONTHLY, PRO_YEARLY, etc.
+  status               String   // ACTIVE, PAST_DUE, CANCELED, INACTIVE
   stripeCustomerId     String?
+  stripeSubscriptionId String?  @unique
+  stripePriceId        String?
   currentPeriodEnd     DateTime?
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model ApiKey {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  hashedKey   String
-  createdAt   DateTime @default(now())
-  lastUsedAt  DateTime?
-  revoked     Boolean  @default(false)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
