@@ -13,14 +13,12 @@ export async function POST(req: NextRequest) {
     try {
         // Parse request body
         const body = await req.json();
-        console.log("Registration request received:", { email: body.email, hasPassword: !!body.password });
 
         // Validate input
         const parsed = schema.safeParse(body);
         if (!parsed.success) {
-            console.error("Validation error:", parsed.error);
             return NextResponse.json(
-                { error: "Invalid input", details: parsed.error.errors },
+                { error: "Invalid input" },
                 { status: 400 }
             );
         }
@@ -33,7 +31,6 @@ export async function POST(req: NextRequest) {
         });
         
         if (existing) {
-            console.log("User already exists:", email);
             return NextResponse.json(
                 { error: "Email already in use" },
                 { status: 409 }
@@ -42,17 +39,14 @@ export async function POST(req: NextRequest) {
 
         // Hash password
         const hashed = await hash(password, 10);
-        console.log("Password hashed successfully");
 
         // Create user
         const user = await prisma.user.create({ 
             data: { 
                 email, 
                 name: name || null,
-                emailVerified: null,
             } 
         });
-        console.log("User created:", user.id);
 
         // Create credentials account
         await prisma.account.create({
@@ -61,17 +55,15 @@ export async function POST(req: NextRequest) {
                 type: "credentials",
                 provider: "credentials",
                 providerAccountId: user.id,
-                refresh_token: hashed, // Store hashed password in refresh_token field
+                refresh_token: hashed,
             },
         });
-        console.log("Account created for user:", user.id);
 
         return NextResponse.json(
-            { success: true, message: "Account created successfully" },
+            { success: true },
             { status: 201 }
         );
     } catch (e: unknown) {
-        console.error("Registration error:", e);
         
         if (e instanceof Error) {
             // Check for specific Prisma errors

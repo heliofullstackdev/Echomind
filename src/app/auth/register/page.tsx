@@ -30,8 +30,6 @@ export default function RegisterPage() {
         }
 
         try {
-            console.log("Attempting registration for:", email);
-            
             const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -43,27 +41,14 @@ export default function RegisterPage() {
             });
 
             const data = await res.json();
-            console.log("Registration response:", { status: res.status, data });
 
             if (!res.ok) {
                 throw new Error(data.error || "Registration failed");
             }
 
-            // Automatically sign in the user after successful registration
-            console.log("Registration successful, signing in...");
-            const signInResult = await signIn("credentials", { 
-                email: email.trim(), 
-                password, 
-                redirect: true, 
-                callbackUrl: "/chat" 
-            });
-
-            if (signInResult?.error) {
-                console.error("Sign in error:", signInResult.error);
-                setError("Account created but sign in failed. Please try logging in manually.");
-            }
+            // Redirect to login page after successful registration
+            window.location.href = "/auth/login?registered=true";
         } catch (err: unknown) {
-            console.error("Registration error:", err);
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(errorMessage);
         } finally {

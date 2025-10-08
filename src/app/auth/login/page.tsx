@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -11,26 +11,10 @@ export default function LoginPage() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const searchParams = useSearchParams();
-
-	useEffect(() => {
-		// Handle OAuth errors
-		const error = searchParams.get("error");
-		if (error) {
-			const errorMessages: Record<string, string> = {
-				OAuthSignin: "Error starting OAuth sign in",
-				OAuthCallback: "Error during OAuth callback",
-				OAuthCreateAccount: "Could not create OAuth account",
-				EmailCreateAccount: "Could not create email account",
-				Callback: "Error in callback",
-				OAuthAccountNotLinked: "Email already in use with different provider",
-				EmailSignin: "Email sign in error",
-				CredentialsSignin: "Invalid email or password",
-				SessionRequired: "Please sign in to access this page",
-				default: "Authentication error occurred",
-			};
-			setError(errorMessages[error] || errorMessages.default);
-		}
-	}, [searchParams]);
+	
+	// Check for success message from registration
+	const registered = searchParams.get("registered");
+	const oauthError = searchParams.get("error");
 
 	const onSubmit = async (e: FormEvent) => {
 		e.preventDefault();
@@ -38,24 +22,17 @@ export default function LoginPage() {
 		setError(null);
 		
 		try {
-			const callbackUrl = searchParams.get("callbackUrl") || "/";
 			const res = await signIn("credentials", { 
 				email, 
 				password, 
 				redirect: false,
-				callbackUrl,
 			});
 			
 			if (res?.error) {
-				// Map NextAuth error to user-friendly message
-				const errorMessages: Record<string, string> = {
-					CredentialsSignin: "Invalid email or password",
-					default: "Authentication failed. Please try again.",
-				};
-				setError(errorMessages[res.error] || res.error);
+				setError("Invalid email or password");
 			} else if (res?.ok) {
-				// Redirect manually on success
-				window.location.href = res.url || callbackUrl;
+				// Redirect to home on success
+				window.location.href = "/";
 			}
 		} catch (err) {
 			console.error("Login error:", err);
@@ -68,8 +45,7 @@ export default function LoginPage() {
 	const handleOAuthSignIn = async (provider: "github" | "google") => {
 		setLoading(true);
 		setError(null);
-		const callbackUrl = searchParams.get("callbackUrl") || "/";
-		await signIn(provider, { callbackUrl });
+		await signIn(provider, { callbackUrl: "/" });
 	};
 
 	return (
@@ -80,9 +56,19 @@ export default function LoginPage() {
 					<ThemeToggle />
 				</div>
 
-				{error && (
+				{registered === "true" && (
+					<div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3">
+						<p className="text-sm text-green-800 dark:text-green-200">
+							✓ Account created successfully! Please sign in.
+						</p>
+					</div>
+				)}
+
+				{(error || oauthError) && (
 					<div className="rounded-md bg-destructive/10 border border-destructive/20 p-3">
-						<p className="text-sm text-destructive">{error}</p>
+						<p className="text-sm text-destructive">
+							{error || "Authentication error occurred"}
+						</p>
 					</div>
 				)}
 
