@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -23,8 +24,10 @@ export default function RegisterPage() {
                 body: JSON.stringify({ name: name || undefined, email, password }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Registration failed");
-            setSuccess(true);
+                if (!res.ok) throw new Error(data.error || "Registration failed");
+                // Automatically sign in the user after successful registration
+                await signIn("credentials", { email, password, redirect: true, callbackUrl: "/" });
+                setSuccess(true);
         } catch (err: unknown) {
             const error = err instanceof Error ? err.message : String(err);
             setError(error);
