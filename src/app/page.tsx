@@ -12,6 +12,8 @@ export default function Home() {
       <p className="text-muted-foreground">Your AI assistant. Start chatting now!</p>
       <div className="flex gap-3">
         <a href="/chat" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90">Start Chatting</a>
+        <a href="/auth/login" className="rounded-lg border px-4 py-2 text-foreground hover:bg-muted">Sign in</a>
+        <a href="/auth/register" className="rounded-lg bg-secondary px-4 py-2 text-secondary-foreground hover:bg-secondary/90">Register</a>
       </div>
     </div>
   );
