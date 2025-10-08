@@ -39,6 +39,12 @@ export default function ChatPage() {
 		return null;
 	}
 
+	const handleSignOut = async () => {
+		await signOut({ redirect: false });
+		// Force a hard refresh to clear all state
+		window.location.href = "/";
+	};
+
 	async function sendMessage() {
 		if (!input.trim() || loading) return;
 		const userMsg: ChatMessage = { role: "user", content: input.trim() };
@@ -99,7 +105,7 @@ export default function ChatPage() {
 							</span>
 						</div>
 						<button
-							onClick={() => signOut({ callbackUrl: "/" })}
+							onClick={handleSignOut}
 							className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground hover:bg-muted transition-colors"
 						>
 							Sign out
