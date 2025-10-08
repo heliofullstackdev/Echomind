@@ -39,7 +39,7 @@ const { PrismaClient } = require('@prisma/client');
     console.log('\n🔧 Environment Check:');
     console.log(`NEXTAUTH_SECRET: ${process.env.NEXTAUTH_SECRET ? '✅ Set' : '❌ Missing'}`);
     console.log(`NEXTAUTH_URL: ${process.env.NEXTAUTH_URL || '❌ Missing'}`);
-    console.log(`DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Set' : '❌ Missing'}`);
+    console.log(`DATABASE_URL: ${process.env.TURSO_DATABASE_URL ? '✅ Set' : '❌ Missing'}`);
     console.log(`GITHUB_ID: ${process.env.GITHUB_ID ? '✅ Set' : '⚠️  Not set (optional)'}`);
     console.log(`OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? '✅ Set' : '⚠️  Not set'}`);
     
